@@ -1,8 +1,8 @@
+import { TaskManager } from "@/components/TaskManager";
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto space-y-8">
-        
         {/* Header */}
         <header className="border-b border-slate-200 pb-6">
           <div className="flex items-center justify-between">
@@ -22,17 +22,22 @@ export default function Home() {
 
         {/* Status Card */}
         <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-800">Project Status</h2>
+          <h2 className="text-lg font-semibold text-slate-800">
+            Project Status
+          </h2>
           <p className="mt-1 text-slate-600 text-sm">
             Next.js App Router + TypeScript + Tailwind CSS initialized.
           </p>
           <div className="mt-4 flex gap-3 text-xs font-medium text-slate-500">
             <span className="bg-slate-100 px-2.5 py-1 rounded">React 19</span>
             <span className="bg-slate-100 px-2.5 py-1 rounded">Next.js 16</span>
-            <span className="bg-slate-100 px-2.5 py-1 rounded">Tailwind v4</span>
+            <span className="bg-slate-100 px-2.5 py-1 rounded">
+              Tailwind v4
+            </span>
           </div>
         </section>
 
+        <TaskManager />
       </div>
     </main>
   );
