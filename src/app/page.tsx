@@ -1,5 +1,18 @@
 import { TaskManager } from "@/components/TaskManager";
-export default function Home() {
+import { prisma } from "@/lib/prisma";
+
+export default async function Home() {
+  const dbTasks = await prisma.task.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
+  const initialTasks = dbTasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    completed: t.completed,
+    createdAt: t.createdAt.toISOString(),
+  }));
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -37,7 +50,7 @@ export default function Home() {
           </div>
         </section>
 
-        <TaskManager />
+        <TaskManager initialTasks={initialTasks} />
       </div>
     </main>
   );

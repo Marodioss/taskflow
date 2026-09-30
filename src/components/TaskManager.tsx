@@ -2,22 +2,13 @@
 import { useState } from "react";
 import { Task, TaskFilter } from "@/types/task";
 
-export function TaskManager() {
+interface TaskManagerProps {
+  initialTasks: Task[];
+}
+
+export function TaskManager({ initialTasks }: TaskManagerProps) {
   const [inputTitle, setInputTitle] = useState<string>("");
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: "1",
-      title: "Deploy TaskFlow to Vercel",
-      completed: true,
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "2",
-      title: "Build interactive client UI",
-      completed: false,
-      createdAt: new Date().toString(),
-    },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   function handleAddTask(e: React.FormEvent) {
     e.preventDefault(); // Rule: Stops browser from reloading the page
