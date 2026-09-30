@@ -1,12 +1,13 @@
 import { TaskManager } from "@/components/TaskManager";
 import { prisma } from "@/lib/prisma";
+import type { Task as DbTask } from "@prisma/client";
 
 export default async function Home() {
   const dbTasks = await prisma.task.findMany({
     orderBy: { createdAt: "desc" },
   });
 
-  const initialTasks = dbTasks.map((t) => ({
+  const initialTasks = dbTasks.map((t: DbTask) => ({
     id: t.id,
     title: t.title,
     completed: t.completed,
