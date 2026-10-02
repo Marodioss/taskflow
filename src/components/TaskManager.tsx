@@ -1,6 +1,11 @@
 "use client";
 import { useState } from "react";
 import { Task, TaskFilter } from "@/types/task";
+import {
+  createTaskAction,
+  toggleTaskAction,
+  deleteTaskAction,
+} from "@/app/action";
 
 interface TaskManagerProps {
   initialTasks: Task[];
@@ -10,30 +15,57 @@ export function TaskManager({ initialTasks }: TaskManagerProps) {
   const [inputTitle, setInputTitle] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
-  function handleAddTask(e: React.FormEvent) {
-    e.preventDefault(); // Rule: Stops browser from reloading the page
-    if (!inputTitle.trim()) return; // Rule: Guard against empty strings
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      title: inputTitle.trim(),
-      completed: false,
-      createdAt: new Date().toISOString(),
-    };
-    setTasks([newTask, ...tasks]);
-    setInputTitle("");
+  async function handleAddTask(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inputTitle.trim()) return;
+    const title = inputTitle.trim();
+    setInputTitle(""); // Clear input immediately for snappy UX
+    try {
+      const created = await createTaskAction(title);
+      const newTask: Task = {
+        id: created.id,
+        title: created.title,
+        completed: created.completed,
+        createdAt: created.createdAt.toISOString(),
+      };
+      setTasks([newTask, ...tasks]);
+    } catch (error) {
+      console.error("Failed to create task", error);
+    }
   }
   // Toggle: .map() returns a new array with just the target item updated
-  function handleToggleTask(id: string) {
+  async function handleToggleTask(id: string) {
+    const target = tasks.find((t) => t.id === id);
+    if (!target) return;
+    const nextStatus = !target.completed;
+    // Step 1: Update UI instantly
     setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
+      tasks.map((t) => (t.id === id ? { ...t, completed: nextStatus } : t)),
     );
+    // Step 2: Persist to Postgres
+    try {
+      await toggleTaskAction(id, nextStatus);
+    } catch (error) {
+      console.error("Failed to toggle task", error);
+      // Revert if DB write fails
+      setTasks(
+        tasks.map((t) => (t.id === id ? { ...t, completed: !nextStatus } : t)),
+      );
+    }
   }
 
   // Delete: .filter() returns a new array excluding the target item
-  function handleDeleteTask(id: string) {
-    setTasks(tasks.filter((task) => task.id !== id));
+  async function handleDeleteTask(id: string) {
+    const previousTasks = tasks;
+    // Step 1: Remove from UI instantly
+    setTasks(tasks.filter((t) => t.id !== id));
+    // Step 2: Delete from Postgres
+    try {
+      await deleteTaskAction(id);
+    } catch (error) {
+      console.error("Failed to delete task", error);
+      setTasks(previousTasks); // Revert if DB write fails
+    }
   }
   const [filter, setFilter] = useState<TaskFilter>("all");
   const filteredTasks = tasks.filter((task) => {
