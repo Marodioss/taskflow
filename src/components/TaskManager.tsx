@@ -11,13 +11,20 @@ interface TaskManagerProps {
   initialTasks: Task[];
 }
 
+type FormState =
+  | { status: "idle" }
+  | { status: "submitting" }
+  | { status: "error"; message: string };
+
 export function TaskManager({ initialTasks }: TaskManagerProps) {
   const [inputTitle, setInputTitle] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [formState, setFormState] = useState<FormState>({ status: "idle" });
 
   async function handleAddTask(e: React.FormEvent) {
     e.preventDefault();
     if (!inputTitle.trim()) return;
+    setFormState({ status: "submitting" });
     const title = inputTitle.trim();
     setInputTitle(""); // Clear input immediately for snappy UX
     try {
@@ -29,8 +36,12 @@ export function TaskManager({ initialTasks }: TaskManagerProps) {
         createdAt: created.createdAt.toISOString(),
       };
       setTasks([newTask, ...tasks]);
+      setFormState({ status: "idle" });
     } catch (error) {
-      console.error("Failed to create task", error);
+      setFormState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to add task",
+      });
     }
   }
   // Toggle: .map() returns a new array with just the target item updated
@@ -95,11 +106,15 @@ export function TaskManager({ initialTasks }: TaskManagerProps) {
         />
         <button
           type="submit"
-          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+          disabled={formState.status === "submitting"}
+          className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition cursor-pointer disabled:cursor-not-allowed"
         >
-          Add Task
+          {formState.status === "submitting" ? "Adding..." : "Add Task"}
         </button>
       </form>
+      {formState.status === "error" && (
+        <p className="text-xs text-red-600 font-medium">{formState.message}</p>
+      )}
 
       <div className="flex gap-2 border-b border-slate-100 pb-3">
         {(["all", "active", "completed"] as TaskFilter[]).map((tab) => (
