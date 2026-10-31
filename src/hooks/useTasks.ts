@@ -28,7 +28,10 @@ export function useTasks(initialTasks: Task[]) {
         id: created.id,
         title: created.title,
         completed: created.completed,
-        createdAt: created.createdAt.toISOString(),
+        createdAt:
+          typeof created.createdAt === "string"
+            ? created.createdAt
+            : new Date(created.createdAt).toISOString(),
       };
       setTasks([newTask, ...tasks]);
       setFormState({ status: "idle" });

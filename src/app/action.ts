@@ -20,7 +20,12 @@ export async function createTaskAction(title: string) {
 
   // Purges Next.js cache so the home page shows the new task immediately
   revalidatePath("/");
-  return task;
+  return {
+    id: task.id,
+    title: task.title,
+    completed: task.completed,
+    createdAt: task.createdAt.toISOString(),
+  };
 }
 
 // 2. Toggle a task in PostgreSQL
@@ -35,7 +40,12 @@ export async function toggleTaskAction(id: string, completed: boolean) {
   });
 
   revalidatePath("/");
-  return task;
+  return {
+    id: task.id,
+    title: task.title,
+    completed: task.completed,
+    createdAt: task.createdAt.toISOString(),
+  };
 }
 
 // 3. Delete a task from PostgreSQL

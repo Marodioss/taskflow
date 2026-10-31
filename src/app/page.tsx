@@ -2,6 +2,8 @@ import { TaskManager } from "@/components/TaskManager";
 import { prisma } from "@/lib/prisma";
 import type { Task as DbTask } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const dbTasks = await prisma.task.findMany({
     orderBy: { createdAt: "desc" },
